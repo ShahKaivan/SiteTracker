@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id                String    @id @default(uuid()) @db.Uuid
+  mobile_number     String    @db.VarChar(20)
+  country_code      String    @db.VarChar(10)
+  password_hash     String?   @db.VarChar(255)
+  full_name         String?   @db.VarChar(255)
+  role              String?   @db.VarChar(50)  
+  profile_image_url String?   @db.Text
+  created_at        DateTime  @default(now()) @db.Timestamp(6)
+  updated_at        DateTime  @updatedAt @db.Timestamp(6)
+  last_login_at     DateTime? @db.Timestamp(6)
+
+  attendance             Attendance[]
+  site_user_assignments  SiteUserAssignment[]
+  announcements_created  Announcement[]
+
+  @@unique([country_code, mobile_number], name: "country_code_mobile_number")
+
+  @@map("users")
+}
+
+model Attendance {
+  id                  String    @id @default(uuid()) @db.Uuid
+  worker_id           String    @db.Uuid
+  site_id             String?    @db.Uuid
+  date                DateTime  @db.Timestamp(6)
+  punch_in_time       DateTime? @db.Timestamp(6)
+  punch_in_latitude   Decimal?  @db.Decimal(10, 8)
+  punch_in_longitude  Decimal?  @db.Decimal(11, 8)
+  punch_in_selfie_url String?   @db.Text
+  punch_out_time      DateTime? @db.Timestamp(6)
+  punch_out_latitude  Decimal?  @db.Decimal(10, 8)
+  punch_out_longitude Decimal?  @db.Decimal(11, 8)
+  punch_out_selfie_url String?  @db.Text
+  total_hours         Decimal?  @db.Decimal(10, 2)
+  created_at          DateTime  @default(now()) @db.Timestamp(6)
+  updated_at          DateTime  @updatedAt @db.Timestamp(6)
+
+  worker              users     @relation(fields: [worker_id], references: [id], onDelete: Cascade)
+  site                Site?     @relation(fields: [site_id], references: [id], onDelete: Restrict)
+
+  @@unique([worker_id, date])
+  @@index([worker_id])
+  @@index([date])
+  @@map("attendance")
+}
+
+model Site {
+  id                    String               @id @default(uuid()) @db.Uuid
+  code                  String?              @unique @db.VarChar(50)
+  name                  String               @db.VarChar(255)
+  address               String?              @db.Text
+  latitude              Decimal?             @db.Decimal(10, 8)
+  longitude             Decimal?             @db.Decimal(11, 8)
+  created_at            DateTime             @default(now()) @db.Timestamp(6)
+  updated_at            DateTime             @updatedAt @db.Timestamp(6)
+  attendance            Attendance[]
+  announcements         Announcement[]
+  site_user_assignments SiteUserAssignment[]
+
+  @@map("sites")
+}
+
+model Announcement {
+  id          String    @id @default(uuid()) @db.Uuid
+  site_id     String?   @db.Uuid
+  title       String    @db.VarChar(255)
+  message     String    @db.Text
+  priority    String    @db.VarChar(20) @default("medium")
+  expiry_date DateTime? @db.Timestamp(6)
+  is_active   Boolean   @default(true)
+  created_by  String?   @db.Uuid
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime  @updatedAt @db.Timestamp(6)
+
+  site        Site?     @relation(fields: [site_id], references: [id], onDelete: SetNull)
+  creator     users?    @relation(fields: [created_by], references: [id], onDelete: SetNull)
+
+  @@index([site_id])
+  @@index([created_by])
+  @@map("announcements")
+}
+
+enum AssignedRole {
+  worker
+  sitecoordinator
+}
+
+model SiteUserAssignment {
+  id            String       @id @default(uuid()) @db.Uuid
+  site_id       String       @db.Uuid
+  user_id       String       @db.Uuid
+  assigned_role AssignedRole
+  created_at    DateTime     @default(now()) @db.Timestamp(6)
+  updated_at    DateTime     @updatedAt @db.Timestamp(6)
+
+  site          Site         @relation(fields: [site_id], references: [id], onDelete: Cascade)
+  user          users        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([site_id, user_id])
+  @@index([site_id])
+  @@index([user_id])
+  @@map("site_user_assignments")
+}
