@@ -25,4 +25,15 @@ router.get(
     userController.getSiteCoordinators,
 );
 
+/**
+ * @route   GET /users/my-site-assignment
+ * @desc    Get current user's site assignment
+ * @access  Private
+ */
+router.get(
+    '/my-site-assignment',
+    authMiddleware,
+    userController.getMyCurrentSiteAssignment,
+);
+
 module.exports = router;

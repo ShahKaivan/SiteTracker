@@ -109,8 +109,50 @@ const getSiteCoordinators = async () => {
     }
 };
 
+/**
+ * Get current site assignment for a specific user
+ * @param {String} userId - User ID
+ * @returns {Object|null} Assignment with site details or null if no assignment
+ */
+const getMyCurrentSiteAssignment = async (userId) => {
+    try {
+        // Find the site assignment for this user
+        const assignment = await prisma.siteUserAssignment.findFirst({
+            where: {
+                user_id: userId,
+            },
+            include: {
+                site: {
+                    select: {
+                        id: true,
+                        name: true,
+                        code: true,
+                    },
+                },
+            },
+        });
+
+        if (!assignment) {
+            return null;
+        }
+
+        return {
+            id: assignment.id,
+            site_id: assignment.site.id,
+            site_name: assignment.site.name,
+            site_code: assignment.site.code,
+            assigned_role: assignment.assigned_role,
+            assigned_at: assignment.assigned_at,
+        };
+    } catch (error) {
+        console.error('Error in getMyCurrentSiteAssignment:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     getUsersBySite,
     getUnassignedWorkers,
     getSiteCoordinators,
+    getMyCurrentSiteAssignment,
 };

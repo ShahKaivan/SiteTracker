@@ -37,24 +37,30 @@ const getSitesForUser = async (userId) => {
     }
 };
 
-/**
- * Assign a worker to a site
- * @param {String} siteId - Site ID
- * @param {String} workerId - Worker/User ID
- * @returns {Object} Created assignment
- */
 const assignWorkerToSite = async (siteId, workerId) => {
     try {
-        // Check if assignment already exists
+        // Check if worker is already assigned to ANY site
         const existingAssignment = await prisma.siteUserAssignment.findFirst({
             where: {
-                site_id: siteId,
                 user_id: workerId,
+            },
+            include: {
+                site: {
+                    select: {
+                        name: true,
+                    },
+                },
             },
         });
 
         if (existingAssignment) {
-            throw new Error('Worker is already assigned to this site');
+            // Check if it's the same site
+            if (existingAssignment.site_id === siteId) {
+                throw new Error('Worker is already assigned to this site');
+            } else {
+                // Worker is assigned to a different site
+                throw new Error(`Worker is already assigned to another site: ${existingAssignment.site.name}`);
+            }
         }
 
         // Create new assignment

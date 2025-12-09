@@ -22,6 +22,7 @@ import 'punch_in_screen.dart';
 import 'punch_out_screen.dart';
 import 'attendance_history_screen.dart';
 import 'announcements_screen.dart';
+import 'worker_site_assignment_screen.dart';
 
 // Worker dashboard screen
 class WorkerDashboard extends StatefulWidget {
@@ -640,6 +641,19 @@ class _WorkerDashboardState extends State<WorkerDashboard> {
           
           // Worker-only menu items
           if (userRole == 'worker') ...[ 
+            ListTile(
+              leading: const Icon(Icons.business),
+              title: const Text('My Site Assignment'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const WorkerSiteAssignmentScreen(),
+                  ),
+                );
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.history),
               title: const Text('My Attendance'),

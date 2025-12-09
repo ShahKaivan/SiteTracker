@@ -249,4 +249,30 @@ class SitesService {
       throw Exception(e.toString().replaceFirst('Exception: ', ''));
     }
   }
+
+  /// Get current user's site assignment
+  /// Returns the current site assignment or null if not assigned
+  Future<Map<String, dynamic>> getMyCurrentSiteAssignment({
+    required String token,
+  }) async {
+    try {
+      _apiService.setToken(token);
+      final response = await _apiService.get(
+        '/users/my-site-assignment',
+      );
+
+      if (response['success'] == true) {
+        return {
+          'success': true,
+          'data': response['data'],
+        };
+      } else {
+        throw Exception(
+          response['message'] as String? ?? 'Failed to fetch site assignment',
+        );
+      }
+    } catch (e) {
+      throw Exception(e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
 }

@@ -39,7 +39,29 @@ const getSiteCoordinators = async (req, res) => {
     }
 };
 
+/**
+ * GET /users/my-site-assignment
+ * Returns the current user's site assignment
+ */
+const getMyCurrentSiteAssignment = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const assignment = await userService.getMyCurrentSiteAssignment(userId);
+
+        return sendSuccess(
+            res,
+            { assignment },
+            assignment ? 'Site assignment retrieved successfully' : 'No site assignment found',
+        );
+    } catch (error) {
+        console.error('Error in getMyCurrentSiteAssignment:', error);
+        return sendError(res, 'Failed to fetch site assignment', 500);
+    }
+};
+
 module.exports = {
     getUnassignedWorkers,
     getSiteCoordinators,
+    getMyCurrentSiteAssignment,
 };
