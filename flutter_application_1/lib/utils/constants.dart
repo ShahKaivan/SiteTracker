@@ -1,7 +1,7 @@
 // App constants
 class Constants {
   // API Base URL - Update this with your backend URL
-  static const String baseUrl = 'http://giveyourip:3000';
+  static const String baseUrl = 'http://145.241.123.184';
   // For Android emulator, use: 'http://10.0.2.2:3000'
   // For iOS simulator, use: 'http://localhost:3000'
   // For physical device, use your computer's IP: 'http://192.168.x.x:3000'
